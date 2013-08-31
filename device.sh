@@ -4,13 +4,66 @@
 #Usage Statement
 usage()
 {
+	echo "
+USAGE:
+Flashes a Device (must have already built)
+No Required Parameters
+You must be in the AOSP directory.
+Run like:
+bash device.sh <optional-arguments>
+
+Optional Parameters: 
+	-u unlock the device if needed
+	-h display this usage message
+	"
+}
+
+
+error()
+{
+	error_message="ERROR "
+	error_message+="$1"
+	len=${#error_message}
+	diff=$(( (80-len) / 2 ))
+	if (( diff <= 0 )); then
+		echo ""
+		echo "$error_message"
+		usage
+	else
+		astString=$(getAstString $diff)
+		error_message="${astString}${error_message}${astString}"
+		if (( $len%2 == 1 )); then
+			error_message+="*"
+		fi
+		echo ""
+		echo "$error_message"
+		usage
+	fi
+}
+getAstString()
+{
+	str=""
+	num="$1"
+	for (( i=1; i <= num ; i++ ))
+	do
+		str+="*"
+	done
+	echo "$str"
+}
+
+
+call()
+{
 	echo ""
-	echo "Used to Flash a Tablet with the Latest Build"
+	echo Calling: $1
+	$1
+}
+
+
+finish()
+{
 	echo ""
-	echo "Optional Arguments: "
-	echo "	-u: use if you want to unlock the device"
-	echo "	-b: use if you want to supress the build (if you've already built everything)"
-	echo "	-f: use if you want to suppress the flash to the device"
+	echo FINISHED
 	echo ""
 }
 
@@ -19,31 +72,21 @@ usage()
 current_dir=${PWD##*/}
 
 if [[ ! $current_dir =~ ^AOSP ]]; then
-	echo ""
-	echo "***************ERROR: Please Enter the appropriate directory: (must be in AOSP)***************"
-	usage
+	error "Please Enter the appropriate directory: (must be in AOSP)"
 	exit 1
 fi
 
 
 #Read in Optional Arguments
 unlock="false"
-build="true"
-flash="true"
-while getopts ":ubhf" opt; do
+while getopts ":uh" opt; do
 	case $opt in
 		u) 
 			unlock="true" 
 			;;
-		b)
-			build="false"
-			;;
 		h) 
 			usage
 			exit 1 
-			;;
-		f)
-			flash="false"
 			;;
 		\?)
 			echo "***************ERROR: Invalid Argument: -$OPTARG***************" >&2
@@ -53,18 +96,6 @@ while getopts ":ubhf" opt; do
 	esac
 done
 shift $(( OPTIND - 1 ))
-
-
-#Build
-source ./build/envsetup.sh
-lunch full_manta-eng
-if [ $build = "true" ]; then
-	echo ""
-	echo "BUILDING"
-	echo ""
-	make update-api
-	make -j16
-fi
 
 
 
@@ -110,18 +141,14 @@ fi
 
 #Unlock if necessary
 if [ $unlock = "true" ]; then
-	fastboot oem unlock
-	fastboot format cache
-	fastboot format userdata
+	call "fastboot oem unlock"
+	call "fastboot format cache"
+	call "fastboot format userdata"
 fi
 
 
 #Flash the device
-if [ $flash = "true" ]; then
-	adb reboot bootloader
-	fastboot -w flashall
-fi
+call "adb reboot bootloader"
+call "fastboot -w flashall"
 
-echo "FINISHED"
-echo ""
-exit 0
+finish

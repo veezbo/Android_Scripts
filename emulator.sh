@@ -5,8 +5,10 @@
 usage()
 {
 	echo "
-Runs the Emulator for testing KNOX and Persona development
+USAGE:
+Runs the Emulator (must have already built)
 No Required Parameters
+You must be in the AOSP directory.
 Run like:
 bash emulator.sh <optional-arguments>
 
@@ -19,12 +21,60 @@ Optional Parameters:
 }
 
 
+getAstString()
+{
+	str=""
+	num="$1"
+	for (( i=1; i <= num ; i++ ))
+	do
+		str+="*"
+	done
+	echo "$str"
+}
+error()
+{
+	error_message="ERROR "
+	error_message+="$1"
+	len=${#error_message}
+	diff=$(( (80-len) / 2 ))
+	if (( diff <= 0 )); then
+		echo ""
+		echo $error_message
+		usage
+	else
+		astString=$(getAstString $diff)
+		error_message="${astString}${error_message}${astString}"
+		if (( $len%2 == 1 )); then
+			error_message+="*"
+		fi
+		echo ""
+		echo "$error_message"
+		usage
+	fi
+}
+
+
+call()
+{
+	echo ""
+	echo Calling: $1
+	$1
+}
+
+
+finish()
+{
+	echo ""
+	echo FINISHED
+	echo ""
+}
+
+
 #Check that we are in the correct directory
 current_dir=${PWD##*/}
 
 if [[ ! $current_dir =~ ^AOSP ]]; then
-	echo ""
-	echo "***************ERROR: Please Enter the appropriate directory: (must be in AOSP)***************"
+	error "Please Enter the appropriate directory: (must be in AOSP)"
 	exit 1
 fi
 
@@ -82,4 +132,5 @@ fi
 
 
 #Make the call
-$call
+call "$call"
+finish
