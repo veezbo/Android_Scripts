@@ -137,7 +137,7 @@ while getopts ":bhuUD:Ej:" opt; do
 		D)
 			build_for="device"
 			arg=$OPTARG
-			devices=("mako" "maguro" "manta" "arndale" "toroplus" "toro" "panda")
+			devices=("mako" "maguro" "manta" "arndale" "toroplus" "toro" "panda" "tuna")
 			valid_arg=$(containsElement $arg ${devices[@]})
 			if [ "$valid_arg" = "false" ]; then
 				error "Please Enter a Valid Device after the Required Arg '-D'"
