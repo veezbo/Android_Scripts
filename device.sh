@@ -15,6 +15,11 @@ bash device.sh <optional-arguments>
 Optional Parameters: 
 	-u unlock the device if needed
 	-h display this usage message
+	
+Examples Uses:
+	bash device.sh [flash the device]
+	bash device.sh -u [flash the device, while unlocking it]
+
 	"
 }
 
