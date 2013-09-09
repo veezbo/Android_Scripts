@@ -16,7 +16,12 @@ Optional Parameters:
 	-w wipe all user data before starting the emulator (not usually suggested)
 	-v set the emulator to run in verbose mode
 	-h display this usage message
-	-u <num_Users> sets the android propery for multiple users
+	-u <num_Users> sets the android max_users propery for multiple users
+
+Example Uses:
+	bash emulator.sh -w [run emulator, while wiping user data]
+	bash emulator.sh -w -u 4 [run emulator, while wiping user data and setting max_users to 4]
+
 	"
 }
 
