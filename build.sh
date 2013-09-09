@@ -13,7 +13,7 @@ Furthermore, you must be in the AOSP directory.
 
 Required Arguments:
 	-D <device name> Set up Environment/Build for the Given Device
-	-E Set up Environment/Build for the Emulator
+	-e/E Set up Environment/Build for the Emulator (e is regular, E is with KVM acceleration)
 
 Optional Arguments: 
 	-b Exclude the Build (i.e. only set up the environment)
@@ -23,8 +23,9 @@ Optional Arguments:
 	-j <# threads> build with number of threads (default 16)
 
 More Examples:
+  source build.sh -e [build for regular emulator]
   source build.sh -D maguro -U [build for maguro device, excluding UiAutomator]
-  source build.sh -E -b [set up emulator environment while supressing build]
+  source build.sh -E -b [set up accelerated emulator environment while supressing build]
 	"
 }
 
@@ -117,7 +118,7 @@ build_UiAutomator="true"
 build_for=""
 device=""
 threads=16
-while getopts ":bhuUD:Ej:" opt; do
+while getopts ":bhuUD:eEj:" opt; do
 	case $opt in
 		b)
 			build="false"
@@ -145,8 +146,11 @@ while getopts ":bhuUD:Ej:" opt; do
 			fi
 			device=$arg
 			;;
-		E)
+		e)
 			build_for="emulator"
+			;;
+		E)
+			build_for="fast_emulator"
 			;;
 		j)
 			arg=$OPTARG
@@ -186,14 +190,19 @@ call "$env_setup"
 lunch_command="lunch full"
 if [ "$build_for" = "device" ]; then
 	lunch_command+="_"
-	lunch_command+=$device
+	lunch_command+="$device"
 fi
+
+if [ "$build_for" = "fast_emulator" ]; then
+	lunch_command+="_x86"
+fi
+
 lunch_command+="-eng"
 call "$lunch_command"
 
 
 #Build UiAutomator if Indicated (by default, yes)
-if [ "$build_UiAutomator" = "true" ]; then
+if [ "$build" = "true" ] && [ "$build_UiAutomator" = "true" ]; then
 	touch frameworks/testing/uiautomator/cmds/uiautomator/src/com/android/commands/uiautomator/DumpCommand.java
 	call "mm uiautomator"
 fi
