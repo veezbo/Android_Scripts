@@ -208,6 +208,10 @@ if [ "$build" = "true" ] && [ "$build_UiAutomator" = "true" ]; then
 fi
 
 
+#Ensure that our API is up-to-date
+call "make update-api"
+
+
 #Build Source Code if Indicated (by default, yes)
 make_command="make -j"
 make_command+=$threads
